@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xsi:schemaLocation="
+    http://www.springframework.org/schema/beans 
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/tx 
+    http://www.springframework.org/schema/tx/spring-tx.xsd
+    http://www.springframework.org/schema/data/jpa
+    http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+    http://www.springframework.org/schema/context 
+    http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<context:property-placeholder location="classpath:application.properties" />
+	<!-- Enable Jpa Repositories -->
+	<jpa:repositories base-package="com.example.springJPA.repository" />
+
+	<!-- Bean post-processor for JPA annotations -->
+	<beans:bean
+		class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" />
+	<!-- DATA SOURCE -->
+	<beans:bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<beans:property name="driverClassName" value="${db.driver}" />
+		<beans:property name="url" value="${db.url}" />
+		<beans:property name="username" value="${db.username}" />
+		<beans:property name="password" value="${db.password}" />
+	</beans:bean>
+	<!-- Entity Manager Factory -->
+	<beans:bean id="eMF"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+		p:dataSource-ref="dataSource" p:packagesToScan="com.example.springJPA.bean">
+		<beans:property name="jpaVendorAdapter">
+			<beans:bean id="jpaAdapter"
+				class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"
+				p:generateDdl="true" p:showSql="true"
+				p:databasePlatform="org.hibernate.dialect.MySQL5InnoDBDialect" />
+		</beans:property>
+	</beans:bean>
+	<!-- Transaction manager -->
+	<beans:bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<beans:property name="entityManagerFactory" ref="eMF" />
+	</beans:bean>
+	<tx:annotation-driven transaction-manager="transactionManager" />
+	<!-- Persistence -->
+	<beans:bean id="persistenceExceptionTranslationPostProcessor"
+		class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
+	
+</beans>
